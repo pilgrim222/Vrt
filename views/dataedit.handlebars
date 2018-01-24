@@ -1,0 +1,81 @@
+<script type="text/javascript">
+    var vegetables = {{{tojson vegetables}}};
+
+    var relationClass = function (rcal) {
+        var relToClassDict = {
+            undefined: 'norel',
+            '1': 'posrel',
+            '-1': 'negrel'
+            };
+        return relToClassDict[rcal];
+    };
+
+    $().ready(
+        function() {
+            $("#vlist").menu({
+                select: function(event, ui) {
+                    var vrelations = $("#vrelations").empty();
+                    var targetId = ui.item[0].firstElementChild.getAttribute("targetid");
+                    var selected = vegetables[targetId];
+
+                    for(var i in vegetables) {
+                        if(i==targetId) {
+                            continue;
+                        }
+                        vrelations.append($("<li>").append($("<div>", {
+                                id: "vrselect_v" + i,
+                                value: i,
+                                text: " " + vegetables[i].name
+                                }).prepend($("<span>", {
+                                    class: relationClass(selected.relationships[i])
+                                })
+                            )
+                        ));
+                    }
+                    vrelations.menu("refresh");
+                }
+            });
+            $("#vrelations").menu();
+        }
+    );
+</script>
+
+
+<h1>Editor</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <span>Vegetable:</span>
+        <ul id="vlist">
+            {{#each vegetables}}
+            <li>
+                <div id="vselect_v{{@key}}" targetid="{{@key}}">{{name}}</div>
+            </li>
+            {{/each}}
+        </ul>
+    </div>
+
+    <div class="col-md-6">
+        
+        <span>Related:</span>
+        <ul id="vrelations">
+
+        </ul>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        Tule bomo dali izbiro tipa
+    </div>    
+</div>
+
+
+<div class="row">
+  <div id="div_uploadMatrix">
+    <form id="fileUpload" method="POST" enctype="multipart/form-data" action="/upload">
+      <input type="file" name="odsfile" />
+      <input type="submit" />
+    </form>
+  </div>
+</div>
