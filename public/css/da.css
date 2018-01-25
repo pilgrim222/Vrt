@@ -22,3 +22,59 @@
     display: inline-block;
     padding: 3px;   
 }
+
+.hidden {
+    display: none;
+}
+
+.context-menu {
+    display: none;
+    position: absolute;
+    z-index: 10;
+}
+
+.context-menu_active {
+    display: block;
+}
+
+.context-menu_item {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.unbound_circle {
+    stroke: black;
+    fill: gray;
+    fill-opacity: 0.1;
+    stroke-dasharray: 5;
+}
+
+.selected_circle {
+    fill-opacity: 0.5;
+    stroke: blue;
+    stroke-width: 2;
+}
+
+.noedge {
+    stroke: black;
+    stroke-width: 1;
+    stroke-dasharray: 1;
+}
+
+.posedge {
+    stroke: green;
+    stroke-width: 2;
+}
+
+.negedge {
+    stroke:red;
+    stroke-width: 2;
+}
+
+.tName {
+    fill:black;
+    opacity: 1;
+    font-weight: bold;
+    text-anchor: middle;
+}
