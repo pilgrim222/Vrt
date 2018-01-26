@@ -26,9 +26,9 @@ create table vrt.vegetable_relation (
        vegetable_id_1 int,
        vegetable_id_2 int,
        effect int,
-       foreign key fk_veg_rel_veg1(vegetable_id_1)
+       foreign key (vegetable_id_1)
        	       references vrt.vegetable(id),
-       foreign key fk_veg_rel_veg2(vegetable_id_2)
+       foreign key (vegetable_id_2)
        	       references vrt.vegetable(id)       
 );
 
@@ -41,4 +41,21 @@ create table vrt.vegetable_herb_relation (
        	       references vrt.vegetable(id),
        foreign key (herb_id)
        	       references vrt.herb(id)       
+);
+
+create table vrt.garden (
+       id int auto_increment primary key
+       garden_name varchar(256)
+);
+
+create table vrt.garden_cell (
+       id int auto_increment primary key,
+       garden_id int,
+       x_pos int not null,
+       y_pos int not null,
+       vegetable_id not null,
+       foreign key (garden_id)
+       	       references vrt.garden(id),
+       foreign key (vegetable_id)
+       	       references vrt.vegetable(id)
 );
