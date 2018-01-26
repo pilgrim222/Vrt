@@ -103,13 +103,14 @@
             .attr("gridy", (d) => d.gridy)
             .attr("targetid", (d) => d.vegetableId)
             .attr("r", CIRCLE_RADIUS)
-            .classed("unbound_circle", true)
-        
+            .classed("unbound_circle", true);
+
+	// TODO - Text placing
         elemEnter.append("text")
             .attr("x", (d) => d.xpos)
             .attr("y", (d) => d.ypos)
             .classed("tName", true)
-            .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name)
+            .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name);
 
         elemEnter.selectAll("line")
             .data((d) => Object.values(d.edges))
