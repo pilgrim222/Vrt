@@ -71,10 +71,14 @@ exports.getData = function(show) {
 		       cb();
 		   },
 		   function(err) {
-		       console.log(data);
+		       // TODO: Check if error
 		       show(data);
 		   });
     });
+}
+
+exports.getGarden = function(garden_id) {
+
 }
 
 var aux_functions = {
