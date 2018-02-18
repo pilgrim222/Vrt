@@ -35,6 +35,8 @@
 
 .context-menu_active {
     display: block;
+    background-color: rgba(255,255,255,0.4);
+    border: solid 1px;
 }
 
 .context-menu_item {
@@ -77,4 +79,21 @@
     opacity: 1;
     font-weight: bold;
     text-anchor: middle;
+}
+
+.vegfilter {
+    height: auto;
+    width: 100%;
+}
+
+.vegfilter input {
+    margin-right: 0.5em;
+}
+
+.vegfilter li {
+    list-style: none;
+}
+
+.vegfilter label {
+    margin-bottom: 0.1em;
 }
