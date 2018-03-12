@@ -4,10 +4,10 @@
 
 <script type="text/javascript">
 
- const CIRCLE_RADIUS = 25;
- const CIRCLE_DIST = 3*CIRCLE_RADIUS;
- const LINE_LEN = CIRCLE_DIST - 2*CIRCLE_RADIUS;
- const CIRC_ALPHA = 0.8;
+ const ELEM_SIZE = 30;
+ const ELEM_DIST = 3*ELEM_SIZE;
+ const LINE_LEN = ELEM_DIST - 2*ELEM_SIZE;
+ const ELEM_ALPHA = 0.8;
 
  const SVG_WIDTH = 500;
  const SVG_HEIGHT = 500;
@@ -19,6 +19,15 @@
 
  const EDGE = "edge";
 
+ const EMPTY_VERTEX = {
+                 xpos: null,
+                 ypos: null,
+                 gridx: null,
+                 gridy: null,
+                 vegetableId: EMPTY_ID,
+                 edges: {}
+             };
+ 
  function initGarden(xdim, ydim) {
      
      function toIndex (ci, cj) {
@@ -30,6 +39,9 @@
      g.toIndex = toIndex;
 
      g.getVertex = function(x, y) {
+		 if(x >= xdim || y >= ydim) {
+			return EMPTY_VERTEX;
+		 }		 
          return this.vertices[this.toIndex(x,y)];
      }
 
@@ -50,8 +62,8 @@
          for(var j = 0; j < ydim; j++) {
              var cindex = toIndex(i, j);
              var tmp = {
-                 xpos: CIRCLE_RADIUS + i * CIRCLE_DIST,
-                 ypos: CIRCLE_RADIUS + j * CIRCLE_DIST,
+                 xpos: ELEM_SIZE + i * ELEM_DIST,
+                 ypos: ELEM_SIZE + j * ELEM_DIST,
                  gridx: i,
                  gridy: j,
                  vegetableId: EMPTY_ID,
@@ -62,8 +74,8 @@
                  var e = {
                      startVertexId: cindex,
                      endVertexId: toIndex(i - 1, j),
-                     startx: tmp.xpos - CIRCLE_RADIUS,
-                     endx: tmp.xpos - CIRCLE_RADIUS - LINE_LEN,
+                     startx: tmp.xpos - ELEM_SIZE,
+                     endx: tmp.xpos - ELEM_SIZE - LINE_LEN,
                      starty: tmp.ypos,
                      endy: tmp.ypos,
                      affinity: 0
@@ -77,8 +89,8 @@
                      endVertexId: toIndex(i, j-1),
                      startx: tmp.xpos,
                      endx: tmp.xpos,
-                     starty: tmp.ypos - CIRCLE_RADIUS,
-                     endy: tmp.ypos - CIRCLE_RADIUS - LINE_LEN,
+                     starty: tmp.ypos - ELEM_SIZE,
+                     endy: tmp.ypos - ELEM_SIZE - LINE_LEN,
                      affinity: 0
                  }
                  tmp.edges['up'] = e;
@@ -95,22 +107,26 @@
      var mainElem = gardenGrid.selectAll("g").data(garden.vertices).enter();
      
      var elemEnter = mainElem.append("g");
-
-     elemEnter.append("circle")
-              .attr("cx", (d) => d.xpos)
-              .attr("cy", (d) => d.ypos)
+	 
+     elemEnter.append("rect")
+              .attr("x", (d) => d.xpos - ELEM_SIZE)
+              .attr("y", (d) => d.ypos - ELEM_SIZE)
               .attr("gridx", (d) => d.gridx)
               .attr("gridy", (d) => d.gridy)
               .attr("targetid", (d) => d.vegetableId)
-              .attr("r", CIRCLE_RADIUS)
+              .attr("width", ELEM_SIZE*2)
+			  .attr("height", ELEM_SIZE*2)
               .classed("unbound_circle", true);
 
-     // TODO - Text placing
-     elemEnter.append("text")
-              .attr("x", (d) => d.xpos)
-              .attr("y", (d) => d.ypos)
+     // TODO - Text sizing
+     elemEnter.append("foreignObject")
+              .attr("x", (d) => d.xpos - ELEM_SIZE)
+              .attr("y", (d) => d.ypos - ELEM_SIZE)
+			  .attr("width", ELEM_SIZE*2)
+			  .attr("height", ELEM_SIZE*2)
               .classed("tName", true)
-              .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name);
+			  .insert("xhtml:div")
+			  .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name);
 
      elemEnter.selectAll("line")
               .data((d) => Object.values(d.edges))
@@ -120,7 +136,7 @@
               .attr('y1', (d) => d.starty)
               .attr('y2', (d) => d.endy);
 
-     gardenGrid.selectAll("text").transition()
+     gardenGrid.selectAll("foreignObject").transition().select("div")
                .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name);
 
      gardenGrid.selectAll("line").transition()
@@ -133,21 +149,29 @@
                    if(d.affinity == 0) return '1';
                    else if(d.affinity > 0) return '6';
                    else return '6';                
-               });;
+               });
  }
 
  var vegetables = {{{tojson vegetables}}};
- var garden = initGarden(10, 10);
+ var garden = initGarden(4, 4);
 
  var additionMode = false;
  var inEditC = null;
  var inEditG = null;
  
-
  $(function() {
      var menu = $("#vegContextMenu");
 
-     $("#gardenGrid").on('contextmenu', 'circle', function(e) {
+	 function hideContextMenu() {
+		if(additionMode) {
+			 additionMode = false;
+			 menu.removeClass(ACTIVE_CLASS);
+			 inEditC.removeClass(SELECTED_CIRCLE_CLASS);
+			 inEditC = null;
+		} 
+	 }	 
+	 
+     $("#gardenGrid").on('contextmenu', 'rect', function(e) {
          if(!additionMode) {
              additionMode = true;
              menu.addClass(ACTIVE_CLASS);
@@ -160,27 +184,33 @@
          inEditG = garden.getVertex(parseInt(inEditC.attr('gridx')), parseInt(inEditC.attr('gridy')));        
          return false;
       });
-
+	  
      $("#gardenGrid").on('click', function(e) {
-         if(additionMode) {
-             additionMode = false;
-             menu.removeClass(ACTIVE_CLASS);
-             inEditC.removeClass(SELECTED_CIRCLE_CLASS);
-             inEditC = null;
-         }
+         hideContextMenu();
          return false;
      });
 
      $("#vegContextMenu").on('mouseenter', '.context-menu_item', function(e) {
-         var c = $(this);
-         var v = vegetables[c.attr('targetid')];
+		 var edges = garden.getEdges(inEditG);
+         var v = vegetables[$(this).attr('targetid')];
+		 var pVegetableId = inEditG.vegetableId;
+		 inEditG.vegetableId = $(this).attr('targetid');
          for(var i=0; i < edges.length; i++) {
              var e = edges[i];
-             e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
-         } // TODO Dopolni za barvanje
-         viz();	    
-         
+			 e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
+         }
+         viz();
+		 // Restore previous state
+		 inEditG.vegetableId = pVegetableId;         
+		 for(var i=0; i < edges.length; i++) {
+             var e = edges[i];
+			 e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
+         }		 
      });
+	 
+	 $("#vegContextMenu").on('mouseleave', '.context-menu_item', function(e) {
+		viz();
+	 });
 
      $("#vegContextMenu").on('mouseexit', '.context-menu_item', function(e) {
          var v = vegetables[$(this).attr('targetid')];
@@ -194,14 +224,23 @@
              e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
          }
          viz();
+		 hideContextMenu();
      });
 
      $(".vfiltercb").on('change', function(e) {
-	 var targetEl = "#cmi" + this.value;
-	 $(targetEl).toggleClass("hidden");
+		 var targetEl = "#cmi" + this.value;
+		 $(targetEl).toggleClass("hidden");
      });
+	 
+	 $("#updateDims").on('click', function(e) {
+		var xdim = parseInt($("#xinput").val());
+		var ydim = parseInt($("#yinput").val());
+		garden = initGarden(xdim, ydim);
+		$("#gardenGrid").empty();
+		viz();
+	 });
 
-     viz();
+     viz();	 
 
  });
 </script>
@@ -214,7 +253,7 @@
     </ul>
 </nav>
 
-<div class="row">
+<div class="row h-100">
     <div class="col-md-4" id="subset_selector">
     	<ul class="vegfilter">
 	  {{#each vegetables}}
@@ -222,8 +261,11 @@
 	  {{/each}}
 	</ul>
     </div>
-    <div class="col-md-8">
-        <svg id="gardenGrid" width="500" height="500">            
-        </svg>
+    <div class="col-md-8 h-100">
+		<div>
+			<span>Velikost vrta: <input type="text" id="xinput" value="4" /> x <input type="text" id="yinput" value="4" /> polj. <input type="button" value="Posodobi" id="updateDims" />
+		</div>
+		<div>&nbsp</div>
+        <svg id="gardenGrid" width="100%" height="100%"/>            
     </div>
 </div>

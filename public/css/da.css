@@ -1,3 +1,11 @@
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+}
+
 .posrel {
     border: solid green;
     border-width: 0 3px 3px 0;
@@ -77,8 +85,9 @@
 .tName {
     fill:black;
     opacity: 1;
-    font-weight: bold;
-    text-anchor: middle;
+    pointer-events: none;
+	overflow: hidden;
+	text-align: center;
 }
 
 .vegfilter {
