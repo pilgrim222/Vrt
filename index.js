@@ -3,7 +3,8 @@ var express = require('express');
 var exphbs  = require('express-handlebars');
 var fileupload = require('express-fileupload');
 var dm = require('./backend/dataManipulation');
-//var da = require('./dataAdmin');
+
+var testData = require('./testData');
 
 var app = express();
 
@@ -22,16 +23,26 @@ app.set('view engine', 'handlebars');
 });*/
 
 app.get('/ui', function (req, res) {
-    dm.getData(function (data) {
-	res.render('ui', {vegetables: data});
-    });
+	if (typeof(testData) === "object") {
+		res.render('ui', {vegetables: testData.test});
+	}
+	else {
+		dm.getData(function (data) {
+			res.render('ui', {vegetables: data});
+		});
+	}
 });
 
 app.get('/dataedit', function (req, res) {
-    dm.getData(function(data) {
-	res.render('dataedit', {vegetables: data});
-    });
-})
+	if (typeof(testData) === "object") {
+		res.render('dataedit', {vegetables: testData.test});
+	}
+	else {
+		dm.getData(function(data) {
+			res.render('dataedit', {vegetables: data});
+		});
+	}
+});
 
 app.post('/upload', function(req, res) {
     if(req.files.odsfile == null) { // Error handling
