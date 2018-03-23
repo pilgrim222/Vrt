@@ -121,7 +121,6 @@
 			  .attr("height", ELEM_SIZE*2)
               .classed("unbound_circle", true);
 
-     // TODO - Text sizing
      elemEnter.append("foreignObject")
               .attr("x", (d) => X_OFFSET + d.xpos - ELEM_SIZE)
               .attr("y", (d) => Y_OFFSET + d.ypos - ELEM_SIZE)
@@ -214,10 +213,6 @@
 	 $("#vegContextMenu").on('mouseleave', '.context-menu_item', function(e) {
 		viz();
 	 });
-
-     $("#vegContextMenu").on('mouseexit', '.context-menu_item', function(e) {
-         var v = vegetables[$(this).attr('targetid')];
-     });
 
      $(".context-menu_item").on('click', function(e) {
          inEditG.vegetableId = $(this).attr('targetid');            
