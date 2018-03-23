@@ -9,6 +9,9 @@
  const LINE_LEN = ELEM_DIST - 2*ELEM_SIZE;
  const ELEM_ALPHA = 0.8;
 
+ const X_OFFSET = 5;
+ const Y_OFFSET = 5;
+
  const SVG_WIDTH = 500;
  const SVG_HEIGHT = 500;
 
@@ -109,8 +112,8 @@
      var elemEnter = mainElem.append("g");
 	 
      elemEnter.append("rect")
-              .attr("x", (d) => d.xpos - ELEM_SIZE)
-              .attr("y", (d) => d.ypos - ELEM_SIZE)
+              .attr("x", (d) => X_OFFSET + d.xpos - ELEM_SIZE)
+              .attr("y", (d) => Y_OFFSET + d.ypos - ELEM_SIZE)
               .attr("gridx", (d) => d.gridx)
               .attr("gridy", (d) => d.gridy)
               .attr("targetid", (d) => d.vegetableId)
@@ -120,8 +123,8 @@
 
      // TODO - Text sizing
      elemEnter.append("foreignObject")
-              .attr("x", (d) => d.xpos - ELEM_SIZE)
-              .attr("y", (d) => d.ypos - ELEM_SIZE)
+              .attr("x", (d) => X_OFFSET + d.xpos - ELEM_SIZE)
+              .attr("y", (d) => Y_OFFSET + d.ypos - ELEM_SIZE)
 			  .attr("width", ELEM_SIZE*2)
 			  .attr("height", ELEM_SIZE*2)
               .classed("tName", true)
@@ -131,10 +134,10 @@
      elemEnter.selectAll("line")
               .data((d) => Object.values(d.edges))
               .enter().append("line")
-              .attr('x1', (d) => d.startx)
-              .attr('x2', (d) => d.endx)
-              .attr('y1', (d) => d.starty)
-              .attr('y2', (d) => d.endy);
+              .attr('x1', (d) => d.startx + X_OFFSET)
+              .attr('x2', (d) => d.endx + X_OFFSET)
+              .attr('y1', (d) => d.starty + Y_OFFSET)
+              .attr('y2', (d) => d.endy + Y_OFFSET);
 
      gardenGrid.selectAll("foreignObject").transition().select("div")
                .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name);
