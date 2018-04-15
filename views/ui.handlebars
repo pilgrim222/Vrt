@@ -15,21 +15,44 @@
  const SVG_WIDTH = 500;
  const SVG_HEIGHT = 500;
 
- const EMPTY_ID = -1;
-
  const ACTIVE_CLASS = "context-menu_active";
  const SELECTED_CIRCLE_CLASS = "selected_circle";
 
  const EDGE = "edge";
 
  const EMPTY_VERTEX = {
-                 xpos: null,
-                 ypos: null,
-                 gridx: null,
-                 gridy: null,
-                 vegetableId: EMPTY_ID,
-                 edges: {}
-             };
+     xpos: null,
+     ypos: null,
+     gridx: null,
+     gridy: null,
+     vegetableIds: [],
+     edges: {}
+ };
+
+ Object.defineProperty(Array.prototype, 'toggle', {
+     enumerable: false,
+     value: function(x) {
+	 var i = this.indexOf(x);
+	 if(i >= 0) {
+	     this.splice(i, 1);
+	     return this;
+	 }
+	 else {
+             this.push(x);
+	     return this;
+	 }
+     }
+ });
+
+ function getPairs(l1, l2) {
+     var pairsl = [];
+     for(var i1 = 0; i1 < l1.length; i1++) {
+	 for(var i2 = 0; i2 < l2.length; i2++) {
+	     pairsl.push([l1[i1], l2[i2]]);
+	 }
+     }
+     return pairsl;
+ }; 
  
  function initGarden(xdim, ydim) {
      
@@ -39,12 +62,13 @@
 
      var g = {};
      g.vertices = [];
+     g.edges = [];
      g.toIndex = toIndex;
 
      g.getVertex = function(x, y) {
-		 if(x >= xdim || y >= ydim) {
-			return EMPTY_VERTEX;
-		 }		 
+	 if(x >= xdim || y >= ydim) {
+	     return EMPTY_VERTEX;
+	 }		 
          return this.vertices[this.toIndex(x,y)];
      }
 
@@ -54,13 +78,22 @@
              this.getVertex(vertex.gridx+1, vertex.gridy).edges.left
          ]).filter((x) => x != null);
      }
+     
+     g.getAffinity = function (v1, v2) { // Po novem vegetable Ids...
 
-     g.getAffinity = function (v1, v2) {
-         if(v1.vegetableId >= 0 && v2.vegetableId >= 0)
-             return vegetables[v1.vegetableId].relationships[v2.vegetableId];
+	 function getRelationshipsForPairs(plist) {
+	     var affinities = [];
+	     for(var i=0; i < plist.length; i++) {
+		 affinities.push(vegetables[plist[i][0]].relationships[plist[i][1]]);
+	     }
+	     return affinities;
+	 }
+	 
+         if(v1.vegetableIds.length > 0 && v2.vegetableIds.length > 0)
+             return getRelationshipsForPairs(getPairs(v1.vegetableIds, v2.vegetableIds)).reduce((x, y) => Math.min(x,y));
          else return 0;
      }
-     
+
      for(var i = 0; i < xdim; i++) {
          for(var j = 0; j < ydim; j++) {
              var cindex = toIndex(i, j);
@@ -69,7 +102,7 @@
                  ypos: ELEM_SIZE + j * ELEM_DIST,
                  gridx: i,
                  gridy: j,
-                 vegetableId: EMPTY_ID,
+                 vegetableIds: [],
                  edges: {}
              };
 
@@ -110,25 +143,25 @@
      var mainElem = gardenGrid.selectAll("g").data(garden.vertices).enter();
      
      var elemEnter = mainElem.append("g");
-	 
+     
      elemEnter.append("rect")
               .attr("x", (d) => X_OFFSET + d.xpos - ELEM_SIZE)
               .attr("y", (d) => Y_OFFSET + d.ypos - ELEM_SIZE)
               .attr("gridx", (d) => d.gridx)
               .attr("gridy", (d) => d.gridy)
-              .attr("targetid", (d) => d.vegetableId)
+              .attr("targetid", (d) => d.vegetableIds)
               .attr("width", ELEM_SIZE*2)
-			  .attr("height", ELEM_SIZE*2)
+	      .attr("height", ELEM_SIZE*2)
               .classed("unbound_circle", true);
 
      elemEnter.append("foreignObject")
               .attr("x", (d) => X_OFFSET + d.xpos - ELEM_SIZE)
               .attr("y", (d) => Y_OFFSET + d.ypos - ELEM_SIZE)
-			  .attr("width", ELEM_SIZE*2)
-			  .attr("height", ELEM_SIZE*2)
+	      .attr("width", ELEM_SIZE*2)
+	      .attr("height", ELEM_SIZE*2)
               .classed("tName", true)
-			  .insert("xhtml:div")
-			  .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name);
+	      .insert("xhtml:div")
+	      .text((d) => d.vegetableIds.length == 0 ? "" : d.vegetableIds.map((x) => vegetables[x].name).join("\n"));
 
      elemEnter.selectAll("line")
               .data((d) => Object.values(d.edges))
@@ -136,10 +169,12 @@
               .attr('x1', (d) => d.startx + X_OFFSET)
               .attr('x2', (d) => d.endx + X_OFFSET)
               .attr('y1', (d) => d.starty + Y_OFFSET)
-              .attr('y2', (d) => d.endy + Y_OFFSET);
+              .attr('y2', (d) => d.endy + Y_OFFSET)
+	      .attr('startVertexId', (d) => d.startVertexId)
+     	      .attr('endVertexId', (d) => d.endVertexId);
 
      gardenGrid.selectAll("foreignObject").transition().select("div")
-               .text((d) => d.vegetableId < 0 ? "" : vegetables[d.vegetableId].name);
+               .text((d) => d.vegetableIds.length == 0 ? "" : d.vegetableIds.map((x) => vegetables[x].name).join("\n"));
 
      gardenGrid.selectAll("line").transition()
                .style('stroke', function(d) {
@@ -148,11 +183,11 @@
                    else return 'red';
                })
                .style('stroke-width', function(d) {
-                   if(d.affinity == 0) return '1';
+                   if(d.affinity == 0) return '2';
                    else if(d.affinity > 0) return '6';
                    else return '6';                
                });
- }
+ } 
 
  var vegetables = {{{tojson vegetables}}};
  var garden = initGarden(4, 4);
@@ -160,19 +195,50 @@
  var additionMode = false;
  var inEditC = null;
  var inEditG = null;
+
+ var selectedE = null;
  
  $(function() {
      var menu = $("#vegContextMenu");
 
-	 function hideContextMenu() {
-		if(additionMode) {
-			 additionMode = false;
-			 menu.removeClass(ACTIVE_CLASS);
-			 inEditC.removeClass(SELECTED_CIRCLE_CLASS);
-			 inEditC = null;
-		} 
-	 }	 
+     function hideContextMenu() {
+	 if(additionMode) {
+	     additionMode = false;
+	     menu.removeClass(ACTIVE_CLASS);
+	     inEditC.removeClass(SELECTED_CIRCLE_CLASS);
+	     inEditC = null;
+	 } 
+     }
+
+     function updateEdgeDetails() {
+	 var sv = garden.vertices[parseInt(selectedE.attr('startVertexId'))];
+	 var ev = garden.vertices[parseInt(selectedE.attr('endVertexId'))];
+
+	 var pairs = getPairs(sv.vegetableIds, ev.vegetableIds);
+
+	 var t = "";
+
+	 for(var i = 0; i < pairs.length; i++) {
+	     var v1 = pairs[i][0];
+	     var v2 = pairs[i][1];
+	     var r1 = vegetables[v1];
+	     var r2 = vegetables[v2];
+	     var affinity = '';
+	     
+	     if (r1.relationships[v2] > 0) {
+		 affinity = 'pos';
+	     }
+	     else if (r1.relationships[v2] < 0) {
+		 affinity = 'neg';
+	     }
+
+	     t = t + `<br /> <span class="${affinity}"> ${r2.name}  : ${r1.name} </span>`;
+	 }
 	 
+	 $("#connectionDetails").html(t);
+	 
+     }
+     
      $("#gardenGrid").on('contextmenu', 'rect', function(e) {
          if(!additionMode) {
              additionMode = true;
@@ -185,58 +251,66 @@
          inEditC.addClass(SELECTED_CIRCLE_CLASS);
          inEditG = garden.getVertex(parseInt(inEditC.attr('gridx')), parseInt(inEditC.attr('gridy')));        
          return false;
-      });
-	  
+     });
+
+     $("#gardenGrid").on('click', 'line', function(e) {
+	 selectedE = $(this);
+	 updateEdgeDetails();
+     });
+     
      $("#gardenGrid").on('click', function(e) {
          hideContextMenu();
          return false;
      });
 
      $("#vegContextMenu").on('mouseenter', '.context-menu_item', function(e) {
-		 var edges = garden.getEdges(inEditG);
+	 var edges = garden.getEdges(inEditG);
          var v = vegetables[$(this).attr('targetid')];
-		 var pVegetableId = inEditG.vegetableId;
-		 inEditG.vegetableId = $(this).attr('targetid');
+	 var pVegetableIds = inEditG.vegetableIds.concat([]);
+	 inEditG.vegetableIds.toggle($(this).attr('targetid'));
          for(var i=0; i < edges.length; i++) {
              var e = edges[i];
-			 e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
+	     e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
          }
          viz();
-		 // Restore previous state
-		 inEditG.vegetableId = pVegetableId;         
-		 for(var i=0; i < edges.length; i++) {
+
+	 // Restore previous state
+	 inEditG.vegetableIds = pVegetableIds;
+	 for(var i=0; i < edges.length; i++) {
              var e = edges[i];
-			 e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
-         }		 
+	     e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
+         }
      });
-	 
-	 $("#vegContextMenu").on('mouseleave', '.context-menu_item', function(e) {
-		viz();
-	 });
+     
+     $("#vegContextMenu").on('mouseleave', '.context-menu_item', function(e) {
+	 viz();
+     });
 
      $(".context-menu_item").on('click', function(e) {
-         inEditG.vegetableId = $(this).attr('targetid');            
+	 var tid = $(this).attr('targetid');
+	 inEditG.vegetableIds.toggle(tid);
          var edges = garden.getEdges(inEditG);
          for(var i=0; i < edges.length; i++) {
              var e = edges[i];
              e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
          }
          viz();
-		 hideContextMenu();
+	 hideContextMenu();
      });
 
      $(".vfiltercb").on('change', function(e) {
-		 var targetEl = "#cmi" + this.value;
-		 $(targetEl).toggleClass("hidden");
+	 var targetEl = "#cmi" + this.value;
+	 $(targetEl).toggleClass("hidden");
      });
-	 
-	 $("#updateDims").on('click', function(e) {
-		var xdim = parseInt($("#xinput").val());
-		var ydim = parseInt($("#yinput").val());
-		garden = initGarden(xdim, ydim);
-		$("#gardenGrid").empty();
-		viz();
-	 });
+     
+     $("#updateDims").on('click', function(e) {
+	 var xdim = parseInt($("#xinput").val());
+	 var ydim = parseInt($("#yinput").val());
+	 var garden2 = initGarden(xdim, ydim);
+	 garden = garden2;
+	 $("#gardenGrid").empty();
+	 viz();
+     });
 
      viz();	 
 
@@ -251,14 +325,23 @@
     </ul>
 </nav>
 
+
 <div class="row h-100">
     <div class="col-md-4" id="subset_selector">
+	<div>
     	<ul class="vegfilter">
 	  {{#each vegetables}}
 	    <li><input type="checkbox" class="vfiltercb" value="{{@key}}" id="vf{{@key}}" /><label for="vf{{@key}}">{{name}}</label></li>
-	  {{/each}}
+	    {{/each}}
 	</ul>
+	</div>
+	<div>
+	    <div class="details" id="connectionDetails">
+		Podrobnosti:
+	    </div>
+	</div>
     </div>
+    
     <div class="col-md-8 h-100">
 		<div>
 			<span>Velikost vrta: <input type="text" id="xinput" value="4" /> x <input type="text" id="yinput" value="4" /> polj. <input type="button" value="Posodobi" id="updateDims" />
