@@ -54,7 +54,6 @@ body {
 }
 
 .unbound_circle {
-    stroke: black;
     fill: gray;
     fill-opacity: 0.1;
     stroke-dasharray: 5;

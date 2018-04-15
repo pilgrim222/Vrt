@@ -26,7 +26,8 @@
      gridx: null,
      gridy: null,
      vegetableIds: [],
-     edges: {}
+     edges: {},
+     affinity: 0
  };
 
  Object.defineProperty(Array.prototype, 'toggle', {
@@ -48,11 +49,22 @@
      var pairsl = [];
      for(var i1 = 0; i1 < l1.length; i1++) {
 	 for(var i2 = 0; i2 < l2.length; i2++) {
-	     pairsl.push([l1[i1], l2[i2]]);
+	     if (l1[i1] != l2[i2])
+		 pairsl.push([l1[i1], l2[i2]]);
 	 }
      }
      return pairsl;
- }; 
+ };
+
+ function getPairsFromSet(l1) {
+     var pairsl = [];
+     for(var i1 = 0; i1 < l1.length; i1++) {
+	 for(var i2 = i1+1; i2 < l1.length; i2++) {
+	     pairsl.push([l1[i1], l1[i2]]);
+	 }
+     }
+     return pairsl;
+ };  
  
  function initGarden(xdim, ydim) {
      
@@ -89,8 +101,10 @@
 	     return affinities;
 	 }
 	 
-         if(v1.vegetableIds.length > 0 && v2.vegetableIds.length > 0)
-             return getRelationshipsForPairs(getPairs(v1.vegetableIds, v2.vegetableIds)).reduce((x, y) => Math.min(x,y));
+	 var pairs = getPairs(v1.vegetableIds, v2.vegetableIds);	 
+         if(pairs.length > 0){
+             return getRelationshipsForPairs(pairs).reduce((x, y) => Math.min(x,y));
+	 }
          else return 0;
      }
 
@@ -103,7 +117,8 @@
                  gridx: i,
                  gridy: j,
                  vegetableIds: [],
-                 edges: {}
+                 edges: {},
+		 affinity: 0
              };
 
              if(i > 0) {
@@ -152,7 +167,17 @@
               .attr("targetid", (d) => d.vegetableIds)
               .attr("width", ELEM_SIZE*2)
 	      .attr("height", ELEM_SIZE*2)
-              .classed("unbound_circle", true);
+	      .classed("unbound_circle", true)
+              .style('stroke', function(d) {
+                  if(d.affinity == 0) return 'black';
+                  else if(d.affinity > 0) return 'green';
+                  else return 'red';
+              })
+              .style('stroke-width', function(d) {
+                  if(d.affinity == 0) return '1';
+                  else if(d.affinity > 0) return '3';
+                  else return '3';                
+              });     
 
      elemEnter.append("foreignObject")
               .attr("x", (d) => X_OFFSET + d.xpos - ELEM_SIZE)
@@ -176,6 +201,19 @@
      gardenGrid.selectAll("foreignObject").transition().select("div")
                .text((d) => d.vegetableIds.length == 0 ? "" : d.vegetableIds.map((x) => vegetables[x].name).join("\n"));
 
+     gardenGrid.selectAll("rect").transition()
+	       .style('stroke', function(d) {
+                   if(d.affinity == 0) return 'black';
+                   else if(d.affinity > 0) return 'green';
+                   else return 'red';
+	       })
+               .style('stroke-width', function(d) {
+                   if(d.affinity == 0) return '1';
+                   else if(d.affinity > 0) return '3';
+                   else return '6';                
+               });
+     
+
      gardenGrid.selectAll("line").transition()
                .style('stroke', function(d) {
                    if(d.affinity == 0) return 'black';
@@ -197,6 +235,7 @@
  var inEditG = null;
 
  var selectedE = null;
+ var selectedV = null;
  
  $(function() {
      var menu = $("#vegContextMenu");
@@ -236,7 +275,32 @@
 	 }
 	 
 	 $("#connectionDetails").html(t);
+     }
+
+     function updateVertexDetails() {
+	 var v = garden.getVertex(parseInt(selectedV.attr('gridx')), parseInt(selectedV.attr('gridy')))
+	 var pairs = getPairsFromSet(v.vegetableIds);
+
+	 var t = "";
+
+	 for(var i = 0; i < pairs.length; i++) {
+	     var v1 = pairs[i][0];
+	     var v2 = pairs[i][1];
+	     var r1 = vegetables[v1];
+	     var r2 = vegetables[v2];
+	     var affinity = '';
+	     
+	     if (r1.relationships[v2] > 0) {
+		 affinity = 'pos';
+	     }
+	     else if (r1.relationships[v2] < 0) {
+		 affinity = 'neg';
+	     }
+
+	     t = t + `<br /> <span class="${affinity}"> ${r2.name}  : ${r1.name} </span>`;
+	 }
 	 
+	 $("#connectionDetails").html(t);
      }
      
      $("#gardenGrid").on('contextmenu', 'rect', function(e) {
@@ -257,6 +321,11 @@
 	 selectedE = $(this);
 	 updateEdgeDetails();
      });
+
+     $("#gardenGrid").on('click', 'rect', function(e) {
+	 selectedV = $(this);
+	 updateVertexDetails();
+     });
      
      $("#gardenGrid").on('click', function(e) {
          hideContextMenu();
@@ -266,12 +335,15 @@
      $("#vegContextMenu").on('mouseenter', '.context-menu_item', function(e) {
 	 var edges = garden.getEdges(inEditG);
          var v = vegetables[$(this).attr('targetid')];
+	 var pAffinity = inEditG.affinity;	 
 	 var pVegetableIds = inEditG.vegetableIds.concat([]);
 	 inEditG.vegetableIds.toggle($(this).attr('targetid'));
+	 
          for(var i=0; i < edges.length; i++) {
              var e = edges[i];
 	     e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
          }
+	 inEditG.affinity = garden.getAffinity(inEditG, inEditG);
          viz();
 
 	 // Restore previous state
@@ -280,6 +352,7 @@
              var e = edges[i];
 	     e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
          }
+	 inEditG.affinity = pAffinity;
      });
      
      $("#vegContextMenu").on('mouseleave', '.context-menu_item', function(e) {
@@ -294,6 +367,7 @@
              var e = edges[i];
              e.affinity = garden.getAffinity(garden.vertices[e.startVertexId], garden.vertices[e.endVertexId]);
          }
+	 inEditG.affinity = garden.getAffinity(inEditG, inEditG);	 
          viz();
 	 hideContextMenu();
      });
