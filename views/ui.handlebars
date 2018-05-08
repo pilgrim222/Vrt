@@ -237,7 +237,7 @@
             .style('stroke', function (d) {
                 if (d.affinity == 0) return 'black';
                 else if (d.affinity > 0) return 'green';
-                else return 'red';
+                else if (d.affinity < 0) return 'red';
             })
             .style('stroke-width', function (d) {
                 if (d.affinity == 0) return '1';
