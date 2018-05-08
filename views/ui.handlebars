@@ -68,33 +68,48 @@
     // Fits the plant names into a square of size "dims"
     // Each plant must be in its own line (or spread over multiple if it is too long)    
 
-    function fitPlants(d, startingScaleFactor=1) {
-        var plantnames = d.vegetableIds.length == 0 ? [""] : d.vegetableIds.map((x) => vegetables[x].name)
-        var splitPlantNames = plantnames.map((pn) => pn.split(/\s+/));
+    function fitPlants(d) {
+        if(d.vegetableIds.length == 0) {
+            return;
+        }
+
+        var splitPlantNames = d.vegetableIds.map((x) => vegetables[x].name.split(/\s+/));
+        
         var getLongestWord = (x, y) => x.length > y.length ? x : y;
         var longestWord = splitPlantNames.map((x) => x.reduce(getLongestWord)).reduce(getLongestWord)
         var minrows = splitPlantNames.length;
 
-        var defx = 1; //v em
-        var defy = 1; //v em
-        var scaleFactor = scaleFactor;
-
-        var lnum = 1;
+        var scaleFactor = 1;
 
         var textElement = d3.select(this);
-        var sy = textElement.attr("y");
         var textElement = textElement.text("");
 
-        var tmp = textElement.append("tspan").text(longestWord);
+        var tmp = textElement.append("tspan").style("font-size", scaleFactor + "em").text(longestWord);
         while(tmp.node().getComputedTextLength() > 2*ELEM_SIZE) {
             scaleFactor = scaleFactor - 0.1;
             tmp.style("font-size", scaleFactor + "em");
-        }        
-        tmp.remove();
+        }
+        tmp.remove();        
+
+        while(!fillTextBox(textElement, splitPlantNames, scaleFactor)) {
+            scaleFactor = scaleFactor - 0.1;
+        }
+    }
+
+    /**
+        Fills the textElement with splitPlantNames using fsize (in em) as style.
+        Auxiliary method, returns true if the text fits and false otherwise.
+    */
+    function fillTextBox(textElement, splitPlantNames, fsize) {
+        var lnum = 1;
+        var sy = textElement.attr("y");
+        var sx = textElement.attr("x");
+
+        textElement.selectAll("tspan").remove();
 
         for(i in splitPlantNames) {
             var currentPlantName = splitPlantNames[i];
-            var ctspan = textElement.append("tspan").attr("x", 0).attr("y", sy).attr("dy", lnum+"em").style("font-size", scaleFactor + "em");
+            var ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em");
             var currentLine = "";
             for(j in currentPlantName) {
                 var word = currentPlantName[j];                
@@ -105,12 +120,16 @@
                 else {
                     ctspan.text(currentLine);
                     lnum = lnum + 1;
-                    ctspan = textElement.append("tspan").attr("x", 0).attr("y", sy).attr("dy", lnum+"em").style("font-size", scaleFactor + "em");
-                    ctspan.text(lnum);
+                    currentLine = word;
+                    ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em").text(currentLine);
+                                    
                 }                
             }
             lnum = lnum + 1;
         }
+
+        var bb = textElement.node().getBBox();
+        return bb.height <= 2 * ELEM_SIZE;
     }
 
     function initGarden(xdim, ydim) {
@@ -244,8 +263,7 @@
             .attr('startVertexId', (d) => d.startVertexId)
             .attr('endVertexId', (d) => d.endVertexId);
 
-        gardenGrid.selectAll("g").transition()
-            .select("text")
+        gardenGrid.selectAll("text").transition()
             .each(fitPlants);
 
         gardenGrid.selectAll("rect").transition()
