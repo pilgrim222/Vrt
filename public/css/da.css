@@ -43,14 +43,19 @@ body {
 
 .context-menu_active {
     display: block;
-    background-color: rgba(255,255,255,0.4);
+    background-color: rgba(255,255,255,0.8);
+    color: rgba(255,255,255, 0.8);
     border: solid 1px;
 }
 
-.context-menu_item {
+.context-menu_items {
     list-style: none;
     margin: 0;
-    padding: 0;
+    padding-left: 0;
+}
+
+.context-menu_item {
+    color: rgba(14, 2, 2, 0.8);
 }
 
 .unbound_circle {
@@ -113,3 +118,24 @@ body {
 .vegfilter label {
     margin-bottom: 0.1em;
 }
+
+
+.blur{
+    position: absolute;
+    overflow: hidden;
+    top: 50%;
+    left: 50%;
+    margin-left: -175px;
+    margin-top: -250px;
+    border-radius: 8px;
+  }
+
+  .blur:before{
+    position: absolute;
+    top: -25px;
+    left: -25px;
+    bottom: 0;
+    right: 0;
+    box-shadow: inset 0 0 0 200px rgba(255,255,255,0.2);
+    filter: blur(20px);
+  }
