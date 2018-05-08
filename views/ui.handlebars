@@ -162,13 +162,13 @@
             function getRelationshipsForPairs(plist) {
                 var affinities = [];
                 for (var i = 0; i < plist.length; i++) {
-                    affinities.push(vegetables[plist[i][0]].relationships[plist[i][1]]);
+                    affinities.push(vegetables[plist[i][0]].relationships[plist[i][1]] || 0);
                 }
                 return affinities;
             }
 
             var pairs = getPairs(v1.vegetableIds, v2.vegetableIds);
-            if (pairs.length > 0) {
+            if (pairs.length > 1) {
                 return getRelationshipsForPairs(pairs).reduce((x, y) => Math.min(x, y));
             }
             else return 0;
@@ -237,7 +237,7 @@
             .style('stroke', function (d) {
                 if (d.affinity == 0) return 'black';
                 else if (d.affinity > 0) return 'green';
-                else if (d.affinity < 0) return 'red';
+                else return 'red';
             })
             .style('stroke-width', function (d) {
                 if (d.affinity == 0) return '1';
@@ -326,7 +326,7 @@
                 var v2 = pairs[i][1];
                 var r1 = vegetables[v1];
                 var r2 = vegetables[v2];
-                var affinity = '';
+                var affinity = 0;
 
                 if (r1.relationships[v2] > 0) {
                     affinity = 'pos';
