@@ -316,6 +316,14 @@
             }
         }
 
+        function updateMenuSelections() {
+                $(".context-menu_item_selected").removeClass("context-menu_item_selected");
+
+                inEditG.vegetableIds.forEach(function(selectedVegetableId) {
+                   $("#cmi" + selectedVegetableId).addClass('context-menu_item_selected');
+            });
+        }
+
         function updateEdgeDetails() {
             var sv = garden.vertices[parseInt(selectedE.attr('startVertexId'))];
             var ev = garden.vertices[parseInt(selectedE.attr('endVertexId'))];
@@ -377,10 +385,13 @@
             } else {
                 inEditC.removeClass(SELECTED_CIRCLE_CLASS);
             }
-            menu.offset({ left: e.clientX, top: e.clientY });
+
             inEditC = $(this);
             inEditC.addClass(SELECTED_CIRCLE_CLASS);
             inEditG = garden.getVertex(parseInt(inEditC.attr('gridx')), parseInt(inEditC.attr('gridy')));
+            updateMenuSelections();
+
+            menu.offset({ left: e.clientX, top: e.clientY });
             return false;
         });
 

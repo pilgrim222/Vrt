@@ -58,6 +58,11 @@ body {
     color: rgba(14, 2, 2, 0.8);
 }
 
+.context-menu_item_selected {
+    color: rgba(14, 2, 2, 0.8);
+    font-weight: bold;
+}
+
 .unbound_circle {
     fill: gray;
     fill-opacity: 0.1;
