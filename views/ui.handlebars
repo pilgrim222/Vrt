@@ -304,6 +304,9 @@
     $(function () {
         var menu = $("#vegContextMenu");
 
+        // clear selections
+        $(".vfiltercb").prop("checked", false);
+
         function hideContextMenu() {
             if (additionMode) {
                 additionMode = false;
