@@ -465,7 +465,7 @@
 
 
 <div class="row h-100">
-    <div class="col-md-4" id="subset_selector">
+    <div class="col-md-3" id="subset_selector">
         <div>
             <ul class="vegfilter">
                 {{#each vegetables}}
@@ -476,21 +476,22 @@
                 {{/each}}
             </ul>
         </div>
-        <div>
-            <div class="details" id="connectionDetails">
-                Podrobnosti:
-            </div>
-        </div>
     </div>
 
-    <div class="col-md-8 h-100">
+    <div class="col-md-6 h-100">
         <div>
-            <span>Velikost vrta:
+            <span>Velikost:
                 <input type="text" id="xinput" value="4" /> x
                 <input type="text" id="yinput" value="4" /> polj.
-                <input type="button" value="Posodobi" id="updateDims" />
+                <input type="button" value="OK" id="updateDims" />
         </div>
         <div>&nbsp</div>
         <svg id="gardenGrid" width="100%" height="100%" />
+    </div>
+
+    <div>
+        Podrobnosti:        
+        <div class="details" id="connectionDetails">
+        </div>
     </div>
 </div>
