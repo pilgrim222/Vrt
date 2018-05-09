@@ -66,8 +66,7 @@
     };
 
     // Fits the plant names into a square of size "dims"
-    // Each plant must be in its own line (or spread over multiple if it is too long)    
-
+    // Each plant must be in its own line (or spread over multiple if it is too long)
     function fitPlants(d) {
         if(d.vegetableIds.length == 0) {
             return;
@@ -85,7 +84,7 @@
         var textElement = textElement.text("");
 
         var tmp = textElement.append("tspan").style("font-size", scaleFactor + "em").text(longestWord);
-        while(tmp.node().getComputedTextLength() > 2*ELEM_SIZE) {
+        while(tmp.node().getComputedTextLength() > 2*ELEM_SIZE - 10) {
             scaleFactor = scaleFactor - 0.1;
             tmp.style("font-size", scaleFactor + "em");
         }
@@ -102,26 +101,26 @@
     */
     function fillTextBox(textElement, splitPlantNames, fsize) {
         var lnum = 1;
-        var sy = textElement.attr("y");
-        var sx = textElement.attr("x");
+        var sy = parseFloat(textElement.attr("y")) + 5;
+        var sx = parseFloat(textElement.attr("x")) + 5;
 
         textElement.selectAll("tspan").remove();
 
         for(i in splitPlantNames) {
             var currentPlantName = splitPlantNames[i];
             var ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em");
-            var currentLine = "";
+            var currentLine = [];
             for(j in currentPlantName) {
                 var word = currentPlantName[j];                
-                ctspan.text(currentLine + " " + word);
-                if(ctspan.node().getComputedTextLength() <= 2*ELEM_SIZE) {
-                    currentLine = currentLine + " " + word;
+                ctspan.text(currentLine.concat([word]).join(" "));
+                if(ctspan.node().getComputedTextLength() <= 2*ELEM_SIZE - 10) {
+                    currentLine.push(word);
                 }
                 else {
-                    ctspan.text(currentLine);
+                    ctspan.text(currentLine.join(" "));
                     lnum = lnum + 1;
-                    currentLine = word;
-                    ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em").text(currentLine);
+                    currentLine = [word];
+                    ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em").text(currentLine.join(" "));
                                     
                 }                
             }
@@ -129,7 +128,7 @@
         }
 
         var bb = textElement.node().getBBox();
-        return bb.height <= 2 * ELEM_SIZE;
+        return bb.height <= 2 * ELEM_SIZE - 10;
     }
 
     function initGarden(xdim, ydim) {
@@ -476,7 +475,6 @@
         {{/each}}
     </ul>
 </nav>
-
 
 <div class="row h-100">
     <div class="col-md-3" id="subset_selector">
