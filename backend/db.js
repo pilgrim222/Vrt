@@ -1,7 +1,9 @@
-var mysql = require('mysql');
+//var mysql = require('mysql');
+var pg = require('pg');
 var connectionData = require('../private/dbconf');
 
-var connection = mysql.createConnection(connectionData.testConnection);
+var connection = new pg(connectionData.testConnection);
+await connection.connect();
 
 /*
 Needs functions for:
