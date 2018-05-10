@@ -66,8 +66,7 @@
     };
 
     // Fits the plant names into a square of size "dims"
-    // Each plant must be in its own line (or spread over multiple if it is too long)    
-
+    // Each plant must be in its own line (or spread over multiple if it is too long)
     function fitPlants(d) {
         if(d.vegetableIds.length == 0) {
             return;
@@ -85,7 +84,7 @@
         var textElement = textElement.text("");
 
         var tmp = textElement.append("tspan").style("font-size", scaleFactor + "em").text(longestWord);
-        while(tmp.node().getComputedTextLength() > 2*ELEM_SIZE) {
+        while(tmp.node().getComputedTextLength() > 2*ELEM_SIZE - 10) {
             scaleFactor = scaleFactor - 0.1;
             tmp.style("font-size", scaleFactor + "em");
         }
@@ -102,26 +101,26 @@
     */
     function fillTextBox(textElement, splitPlantNames, fsize) {
         var lnum = 1;
-        var sy = textElement.attr("y");
-        var sx = textElement.attr("x");
+        var sy = parseFloat(textElement.attr("y")) + 5;
+        var sx = parseFloat(textElement.attr("x")) + 5;
 
         textElement.selectAll("tspan").remove();
 
         for(i in splitPlantNames) {
             var currentPlantName = splitPlantNames[i];
             var ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em");
-            var currentLine = "";
+            var currentLine = [];
             for(j in currentPlantName) {
                 var word = currentPlantName[j];                
-                ctspan.text(currentLine + " " + word);
-                if(ctspan.node().getComputedTextLength() <= 2*ELEM_SIZE) {
-                    currentLine = currentLine + " " + word;
+                ctspan.text(currentLine.concat([word]).join(" "));
+                if(ctspan.node().getComputedTextLength() <= 2*ELEM_SIZE - 10) {
+                    currentLine.push(word);
                 }
                 else {
-                    ctspan.text(currentLine);
+                    ctspan.text(currentLine.join(" "));
                     lnum = lnum + 1;
-                    currentLine = word;
-                    ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em").text(currentLine);
+                    currentLine = [word];
+                    ctspan = textElement.append("tspan").attr("x", sx).attr("y", sy).attr("dy", lnum+"em").style("font-size", fsize + "em").text(currentLine.join(" "));
                                     
                 }                
             }
@@ -129,7 +128,7 @@
         }
 
         var bb = textElement.node().getBBox();
-        return bb.height <= 2 * ELEM_SIZE;
+        return bb.height <= 2 * ELEM_SIZE - 10;
     }
 
     function initGarden(xdim, ydim) {
@@ -304,6 +303,9 @@
     $(function () {
         var menu = $("#vegContextMenu");
 
+        // clear selections
+        $(".vfiltercb").prop("checked", false);
+
         function hideContextMenu() {
             if (additionMode) {
                 additionMode = false;
@@ -311,6 +313,14 @@
                 inEditC.removeClass(SELECTED_CIRCLE_CLASS);
                 inEditC = null;
             }
+        }
+
+        function updateMenuSelections() {
+                $(".context-menu_item_selected").removeClass("context-menu_item_selected");
+
+                inEditG.vegetableIds.forEach(function(selectedVegetableId) {
+                   $("#cmi" + selectedVegetableId).addClass('context-menu_item_selected');
+            });
         }
 
         function updateEdgeDetails() {
@@ -374,10 +384,13 @@
             } else {
                 inEditC.removeClass(SELECTED_CIRCLE_CLASS);
             }
-            menu.offset({ left: e.clientX, top: e.clientY });
+
             inEditC = $(this);
             inEditC.addClass(SELECTED_CIRCLE_CLASS);
             inEditG = garden.getVertex(parseInt(inEditC.attr('gridx')), parseInt(inEditC.attr('gridy')));
+            updateMenuSelections();
+
+            menu.offset({ left: e.clientX, top: e.clientY });
             return false;
         });
 
@@ -463,9 +476,8 @@
     </ul>
 </nav>
 
-
 <div class="row h-100">
-    <div class="col-md-4" id="subset_selector">
+    <div class="col-md-3" id="subset_selector">
         <div>
             <ul class="vegfilter">
                 {{#each vegetables}}
@@ -476,21 +488,22 @@
                 {{/each}}
             </ul>
         </div>
-        <div>
-            <div class="details" id="connectionDetails">
-                Podrobnosti:
-            </div>
-        </div>
     </div>
 
-    <div class="col-md-8 h-100">
+    <div class="col-md-6 h-100">
         <div>
-            <span>Velikost vrta:
+            <span>Velikost:
                 <input type="text" id="xinput" value="4" /> x
                 <input type="text" id="yinput" value="4" /> polj.
-                <input type="button" value="Posodobi" id="updateDims" />
+                <input type="button" value="OK" id="updateDims" />
         </div>
         <div>&nbsp</div>
         <svg id="gardenGrid" width="100%" height="100%" />
+    </div>
+
+    <div>
+        Podrobnosti:        
+        <div class="details" id="connectionDetails">
+        </div>
     </div>
 </div>
