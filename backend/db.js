@@ -3,7 +3,7 @@ var pg = require('pg');
 var connectionData = require('../private/dbconf');
 
 var connection = new pg(connectionData.testConnection);
-await connection.connect();
+connection.connect();
 
 /*
 Needs functions for:
