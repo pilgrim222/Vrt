@@ -1,8 +1,8 @@
 //var mysql = require('mysql');
-var pg = require('pg');
+var { Client } = require('pg');
 var connectionData = require('../private/dbconf');
 
-var connection = new pg(connectionData.testConnection);
+var connection = new Client(connectionData.testConnection);
 connection.connect();
 
 /*
