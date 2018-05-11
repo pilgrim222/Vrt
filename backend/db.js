@@ -31,7 +31,8 @@ exports.getData = function(postProcess) {
     var query = "SELECT v.id as id, v.vegetable_name as name, vr.vegetable_id_2 as related_id, vr.effect as effect FROM vrt.vegetable v left join vrt.vegetable_relation vr on v.id=vr.vegetable_id_1";
 
     connection.query(query, function(error, result, fields) {
-	    postProcess(result);
+        //postProcess(result);
+        postProcess(result.rows);
     });
     
 }
