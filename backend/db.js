@@ -39,7 +39,7 @@ exports.getData = function(postProcess) {
 
 exports.insertPlantRelationIds = function (id1, id2, rval, cb) {
     //var query = "INSERT INTO vrt.vegetable_relation SET vegetable_id_1 = ?, vegetable_id_2 = ?, effect = ?";
-    var query = "INSERT INTO vrt.vegetable_relation (vegetable_id_1, vegetable_id_2, effect) VALUES ($1,  $2, $3)";
+    var query = "INSERT INTO vrt.vegetable_relation (vegetable_id_1, vegetable_id_2, effect) VALUES ($1,$2,$3)";
 
     connection.query(query, [id1, id2, rval], function(error, result, fields) {
 	if (error) {
