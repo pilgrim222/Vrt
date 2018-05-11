@@ -15,7 +15,8 @@ exports.getPlantList = function () {
 };
 
 exports.insertPlant = function (plantName, cb) {
-    var query = "INSERT INTO vrt.vegetable SET vegetable_name = ?";
+    //var query = "INSERT INTO vrt.vegetable SET vegetable_name = ?";
+    var query = "INSERT INTO vrt.vegetable (vegetable_name) VALUES ($1)";
 
     connection.query(query, [plantName], function(error, result, fields) {
 	if (error) {
@@ -30,14 +31,14 @@ exports.getData = function(postProcess) {
     var query = "SELECT v.id as id, v.vegetable_name as name, vr.vegetable_id_2 as related_id, vr.effect as effect FROM vrt.vegetable v left join vrt.vegetable_relation vr on v.id=vr.vegetable_id_1";
 
     connection.query(query, function(error, result, fields) {
-	postProcess(result);
+	    postProcess(result);
     });
-
     
 }
 
 exports.insertPlantRelationIds = function (id1, id2, rval, cb) {
-    var query = "INSERT INTO vrt.vegetable_relation SET vegetable_id_1 = ?, vegetable_id_2 = ?, effect = ?";
+    //var query = "INSERT INTO vrt.vegetable_relation SET vegetable_id_1 = ?, vegetable_id_2 = ?, effect = ?";
+    var query = "INSERT INTO vrt.vegetable_relation (vegetable_id_1, vegetable_id_2, effect) VALUES ($1,  $2, $3)";
 
     connection.query(query, [id1, id2, rval], function(error, result, fields) {
 	if (error) {
