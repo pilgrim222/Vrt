@@ -32,7 +32,7 @@ exports.neighbouringMatrix = function (fileContent) {
 
     async.each(plants, function(x, cb) {
 	db.insertPlant(x, function(insertedId) {
-	    plantToIdMap[x] = r.insertedId;
+	    plantToIdMap[x] = insertedId;
 	    cb();
 	});
     }, function(err) {
