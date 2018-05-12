@@ -33,7 +33,7 @@ exports.getData = function(postProcess) {
 
     connection.query(query, function(error, result, fields) {
         //postProcess(result);
-        postProcess(result);
+        postProcess(result.rows);
     });
     
 }
