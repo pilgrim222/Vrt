@@ -1,1 +1,1 @@
-drop schema vrt;
+drop schema vrt cascade;
