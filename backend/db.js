@@ -23,6 +23,7 @@ exports.insertPlant = function (plantName, cb) {
 	    console.log(error);
 	    return;
 	}
+	console.log(result);
 	cb(result.rows[0].id);
     });
 };
@@ -32,7 +33,7 @@ exports.getData = function(postProcess) {
 
     connection.query(query, function(error, result, fields) {
         //postProcess(result);
-        postProcess(result.rows[0].id);
+        postProcess(result);
     });
     
 }
