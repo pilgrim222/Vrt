@@ -23,7 +23,7 @@ exports.insertPlant = function (plantName, cb) {
 	    console.log(error);
 	    return;
 	}
-	cb(result.rows[0].);
+	cb(result.rows[0].id);
     });
 };
 
