@@ -16,7 +16,7 @@ exports.getPlantList = function () {
 
 exports.insertPlant = function (plantName, cb) {
     //var query = "INSERT INTO vrt.vegetable SET vegetable_name = ?";
-    var query = "INSERT INTO vrt.vegetable (vegetable_name) VALUES ($1)";
+    var query = "INSERT INTO vrt.vegetable (vegetable_name) VALUES ($1) RETURNING id";
 
     connection.query(query, [plantName], function(error, result, fields) {
 	if (error) {
