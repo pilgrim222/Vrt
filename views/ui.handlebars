@@ -167,7 +167,7 @@
             }
 
             var pairs = getPairs(v1.vegetableIds, v2.vegetableIds);
-            if (pairs.length > 1) {
+            if (pairs.length > 0) {
                 return getRelationshipsForPairs(pairs).reduce((x, y) => Math.min(x, y));
             }
             else return 0;
@@ -475,8 +475,20 @@
         {{/each}}
     </ul>
 </nav>
-
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">WebSiteName</a>
+    </div>
+    <ul class="nav navbar-nav">
+      <li class="active"><a href="#">Home</a></li>
+      <li><a href="#">Iz datoteke</a></li>
+      <li><a href="#">Shrani</a></li>
+    </ul>
+  </div>
+</nav>
 <div class="row h-100">
+    <span>&#x1F33F;Rastline</span>
     <div class="col-md-3" id="subset_selector">
         <div>
             <ul class="vegfilter">
@@ -497,7 +509,7 @@
                 <input type="text" id="yinput" value="4" /> polj.
                 <input type="button" value="OK" id="updateDims" />
         </div>
-        <div>&nbsp</div>
+        <div>&nbsp;</div>
         <svg id="gardenGrid" width="100%" height="100%" />
     </div>
 
