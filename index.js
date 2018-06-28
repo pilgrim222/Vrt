@@ -4,7 +4,7 @@ var exphbs  = require('express-handlebars');
 var fileupload = require('express-fileupload');
 var dm = require('./backend/dataManipulation');
 
-var testData = require('./testData');
+//var testData = require('./testData');
 
 var app = express();
 
@@ -19,23 +19,23 @@ app.set('view engine', 'handlebars');
 
 app.get('/ui', function (req, res) {
 	if (typeof(testData) === "object") {
-	    res.render('ui', {vegetables: testData.test, garden: "false"});
+	    res.render('ui', {vegetables: testData.test, state: "false"});
 	}
 	else {
 		dm.getData(function (data) {
-		    res.render('ui', {vegetables: data, garden: "false"});
+		    res.render('ui', {vegetables: data, state: "false"});
 		});
 	}
 });
 
 app.post('/ui', function (req, res) {
-    let uploadedGarden = req.files.gardenFile.data.toString("utf-8"); 
+    let uploadedState = req.files.gardenFile.data.toString("utf-8"); 
     if (typeof(testData) === "object") {
-	res.render('ui', {vegetables: testData.test, garden: uploadedGarden});
+	res.render('ui', {vegetables: testData.test, state: uploadedState});
     }
     else {
 	dm.getData(function (data) {
-	    res.render('ui', {vegetables: data, garden: uploadedGarden});
+	    res.render('ui', {vegetables: data, state: uploadedState});
 	});
     }    
 });

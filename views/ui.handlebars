@@ -137,10 +137,12 @@
          return ci * ydim + cj;
      }
 
-     var g = {};
+     let g = Object.create({});
      g.vertices = [];
      g.edges = [];
      g.toIndex = toIndex;
+     g.xdim = xdim;
+     g.ydim = ydim;
 
      g.getVertex = function (x, y) {
          if (x >= xdim || y >= ydim) {
@@ -291,7 +293,7 @@
  }
 
  var vegetables = {{{ tojson vegetables }}};
- var garden = {{{ garden }}} || initGarden(4, 4);
+ var {garden, selections} = {{{ state }}} || { garden: initGarden(4, 4), selections: []};
 
  var additionMode = false;
  var inEditC = null;
@@ -303,8 +305,12 @@
  $(function () {
      var menu = $("#vegContextMenu");
 
-     // clear selections
+     // load state
      $(".vfiltercb").prop("checked", false);
+     selections.forEach((x) => $(`#${x}`).prop("checked", true));     
+ 
+     $("#xinput").val(garden.xdim);
+     $("#yinput").val(garden.ydim);
 
      function hideContextMenu() {
          if (additionMode) {
@@ -466,15 +472,15 @@
      viz();
 
      // Navigation buttons
-
      $("#btn_saveGarden").on('click', function(e) {
          let fileName = prompt("Ime vrta");
-         let content = new Blob([JSON.stringify(garden)], {type: 'octet/stream'});
+         let selections = $(".vfiltercb").filter((_, x) => x.checked).map((_, x) => x.id).toArray();
+         let content = new Blob([JSON.stringify({garden, selections})], {type: 'octet/stream'});
          saveAs(content, fileName + ".json");
      });
 
      $("#gardenUpload").on('change', function(e) {
-	 $("#gardenUploadForm").submit();
+	    $("#gardenUploadForm").submit();
      });
  });
 </script>
