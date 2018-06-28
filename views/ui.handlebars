@@ -137,16 +137,15 @@
 
  function initGarden(xdim, ydim) {
 
-     function toIndex(ci, cj) {
-         return ci * this.ydim + cj;
-     }
-
      let g = Object.create({});
      g.vertices = [];
      g.edges = [];
-     g.toIndex = toIndex;
      g.xdim = xdim;
      g.ydim = ydim;
+
+     g.toIndex = function(ci, cj) {
+         return ci * this.ydim + cj;
+     }
 
      g.getVertex = function (x, y) {
          if (x >= this.xdim || y >= this.ydim) {
@@ -181,7 +180,7 @@
 
      for (var i = 0; i < xdim; i++) {
          for (var j = 0; j < ydim; j++) {
-             var cindex = toIndex(i, j);
+             var cindex = g.toIndex(i, j);
              var tmp = {
                  xpos: ELEM_SIZE + i * ELEM_DIST,
                  ypos: ELEM_SIZE + j * ELEM_DIST,
@@ -195,7 +194,7 @@
              if (i > 0) {
                  var e = {
                      startVertexId: cindex,
-                     endVertexId: toIndex(i - 1, j),
+                     endVertexId: g.toIndex(i - 1, j),
                      startx: tmp.xpos - ELEM_SIZE,
                      endx: tmp.xpos - ELEM_SIZE - LINE_LEN,
                      starty: tmp.ypos,
@@ -208,7 +207,7 @@
              if (j > 0) {
                  var e = {
                      startVertexId: cindex,
-                     endVertexId: toIndex(i, j - 1),
+                     endVertexId: g.toIndex(i, j - 1),
                      startx: tmp.xpos,
                      endx: tmp.xpos,
                      starty: tmp.ypos - ELEM_SIZE,
