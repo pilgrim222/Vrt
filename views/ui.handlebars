@@ -131,10 +131,14 @@
      return bb.height <= 2 * ELEM_SIZE - 10;
  }
 
+ function loadGarden(gardenObject) {
+     return Object.assign(initGarden(0, 0), gardenObject);
+ }
+
  function initGarden(xdim, ydim) {
 
      function toIndex(ci, cj) {
-         return ci * ydim + cj;
+         return ci * this.ydim + cj;
      }
 
      let g = Object.create({});
@@ -145,7 +149,7 @@
      g.ydim = ydim;
 
      g.getVertex = function (x, y) {
-         if (x >= xdim || y >= ydim) {
+         if (x >= this.xdim || y >= this.ydim) {
              return EMPTY_VERTEX;
          }
          return this.vertices[this.toIndex(x, y)];
@@ -295,6 +299,10 @@
  var vegetables = {{{ tojson vegetables }}};
  var {garden, selections} = {{{ state }}} || { garden: initGarden(4, 4), selections: []};
 
+ if({{{state}}} != false) {
+     garden = loadGarden(garden);
+ }
+
  var additionMode = false;
  var inEditC = null;
  var inEditG = null;
@@ -304,13 +312,6 @@
 
  $(function () {
      var menu = $("#vegContextMenu");
-
-     // load state
-     $(".vfiltercb").prop("checked", false);
-     selections.forEach((x) => $(`#${x}`).prop("checked", true));     
- 
-     $("#xinput").val(garden.xdim);
-     $("#yinput").val(garden.ydim);
 
      function hideContextMenu() {
          if (additionMode) {
@@ -482,6 +483,16 @@
      $("#gardenUpload").on('change', function(e) {
 	    $("#gardenUploadForm").submit();
      });
+
+     // load state
+     $(".vfiltercb").prop("checked", false);
+     selections.forEach((x) => {
+         $(`#${x}`).prop("checked", true);
+         $(`#${x}`).change();
+     });     
+ 
+     $("#xinput").val(garden.xdim);
+     $("#yinput").val(garden.ydim);     
  });
 </script>
 
