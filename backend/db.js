@@ -31,7 +31,7 @@ exports.getData = function(postProcess) {
 
     connection.query(query, function(error, result, fields) {
         let o = {};        
-        result.rows.each((x) => o[x.id] = x);
+        result.rows.forEach((x) => o[x.id] = x);
         postProcess(o);
     });
     
