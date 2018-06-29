@@ -6,18 +6,12 @@
  const ELEM_SIZE = 30;
  const ELEM_DIST = 3 * ELEM_SIZE;
  const LINE_LEN = ELEM_DIST - 2 * ELEM_SIZE;
- const ELEM_ALPHA = 0.8;
-
+ 
  const X_OFFSET = 5;
  const Y_OFFSET = 5;
 
- const SVG_WIDTH = 500;
- const SVG_HEIGHT = 500;
-
  const ACTIVE_CLASS = "context-menu_active";
  const SELECTED_CIRCLE_CLASS = "selected_circle";
-
- const EDGE = "edge";
 
  const EMPTY_VERTEX = {
      xpos: null,
@@ -45,9 +39,9 @@
  });
 
  function getPairs(l1, l2) {
-     var pairsl = [];
-     for (var i1 = 0; i1 < l1.length; i1++) {
-         for (var i2 = 0; i2 < l2.length; i2++) {
+     let pairsl = [];
+     for (let i1 = 0; i1 < l1.length; i1++) {
+         for (let i2 = 0; i2 < l2.length; i2++) {
              if (l1[i1] != l2[i2])
                  pairsl.push([l1[i1], l2[i2]]);
          }
@@ -56,9 +50,9 @@
  };
 
  function getPairsFromSet(l1) {
-     var pairsl = [];
-     for (var i1 = 0; i1 < l1.length; i1++) {
-         for (var i2 = i1 + 1; i2 < l1.length; i2++) {
+     let pairsl = [];
+     for (let i1 = 0; i1 < l1.length; i1++) {
+         for (let i2 = i1 + 1; i2 < l1.length; i2++) {
              pairsl.push([l1[i1], l1[i2]]);
          }
      }
@@ -124,104 +118,107 @@
                  
              }                
          }
-         lnum = lnum + 1;
+         lnum += 1;
      }
 
-     var bb = textElement.node().getBBox();
-     return bb.height <= 2 * ELEM_SIZE - 10;
+     return textElement.node().getBBox().height <= 2 * ELEM_SIZE - 10;
  }
 
- function loadGarden(gardenObject) {
-     return Object.assign(initGarden(0, 0), gardenObject);
- }
+class Garden {
 
- function initGarden(xdim, ydim) {
+    constructor(xdim, ydim) {
+        this.vertices = [];
+        this.xdim = xdim;
+        this.ydim = ydim;
 
-     let g = Object.create({});
-     g.vertices = [];
-     g.edges = [];
-     g.xdim = xdim;
-     g.ydim = ydim;
+        this.initGrid();
+    }
 
-     g.toIndex = function(ci, cj) {
+     toIndex(ci, cj) {
          return ci * this.ydim + cj;
      }
 
-     g.getVertex = function (x, y) {
+     getVertex(x, y) {
          if (x >= this.xdim || y >= this.ydim) {
              return EMPTY_VERTEX;
          }
          return this.vertices[this.toIndex(x, y)];
      }
 
-     g.getEdges = function (vertex) {
+     getEdges(vertex) {
          return Object.values(vertex.edges).concat([
              this.getVertex(vertex.gridx, vertex.gridy + 1).edges.up,
              this.getVertex(vertex.gridx + 1, vertex.gridy).edges.left
          ]).filter((x) => x != null);
      }
 
-     g.getAffinity = function (v1, v2) { // Po novem vegetable Ids...
-
+     getAffinity(v1, v2) { // Po novem vegetable Ids...
          function getRelationshipsForPairs(plist) {
-             var affinities = [];
-             for (var i = 0; i < plist.length; i++) {
+             let affinities = [];
+             for (let i = 0; i < plist.length; i++) {
                  affinities.push(vegetables[plist[i][0]].relationships[plist[i][1]] || 0);
              }
              return affinities;
          }
 
-         var pairs = getPairs(v1.vegetableIds, v2.vegetableIds);
+         let pairs = getPairs(v1.vegetableIds, v2.vegetableIds);
          if (pairs.length > 0) {
              return getRelationshipsForPairs(pairs).reduce((x, y) => Math.min(x, y));
          }
          else return 0;
      }
 
-     for (var i = 0; i < xdim; i++) {
-         for (var j = 0; j < ydim; j++) {
-             var cindex = g.toIndex(i, j);
-             var tmp = {
-                 xpos: ELEM_SIZE + i * ELEM_DIST,
-                 ypos: ELEM_SIZE + j * ELEM_DIST,
-                 gridx: i,
-                 gridy: j,
-                 vegetableIds: [],
-                 edges: {},
-                 affinity: 0
-             };
+     initGrid() {
+        for (let i = 0; i < this.xdim; i++) {
+            for (let j = 0; j < this.ydim; j++) {
+                let cindex = this.toIndex(i, j);
+                let tmp = {
+                    xpos: ELEM_SIZE + i * ELEM_DIST,
+                    ypos: ELEM_SIZE + j * ELEM_DIST,
+                    gridx: i,
+                    gridy: j,
+                    vegetableIds: [],
+                    edges: {},
+                    affinity: 0
+                };
 
-             if (i > 0) {
-                 var e = {
-                     startVertexId: cindex,
-                     endVertexId: g.toIndex(i - 1, j),
-                     startx: tmp.xpos - ELEM_SIZE,
-                     endx: tmp.xpos - ELEM_SIZE - LINE_LEN,
-                     starty: tmp.ypos,
-                     endy: tmp.ypos,
-                     affinity: 0
-                 };
-                 tmp.edges['left'] = e;
-             }
+                if (i > 0) {
+                    tmp.edges['left'] = {
+                        startVertexId: cindex,
+                        endVertexId: this.toIndex(i - 1, j),
+                        startx: tmp.xpos - ELEM_SIZE,
+                        endx: tmp.xpos - ELEM_SIZE - LINE_LEN,
+                        starty: tmp.ypos,
+                        endy: tmp.ypos,
+                        affinity: 0
+                    };
+                }
 
-             if (j > 0) {
-                 var e = {
-                     startVertexId: cindex,
-                     endVertexId: g.toIndex(i, j - 1),
-                     startx: tmp.xpos,
-                     endx: tmp.xpos,
-                     starty: tmp.ypos - ELEM_SIZE,
-                     endy: tmp.ypos - ELEM_SIZE - LINE_LEN,
-                     affinity: 0
-                 }
-                 tmp.edges['up'] = e;
-             }
+                if (j > 0) {
+                    tmp.edges['up'] = {
+                        startVertexId: cindex,
+                        endVertexId: this.toIndex(i, j - 1),
+                        startx: tmp.xpos,
+                        endx: tmp.xpos,
+                        starty: tmp.ypos - ELEM_SIZE,
+                        endy: tmp.ypos - ELEM_SIZE - LINE_LEN,
+                        affinity: 0
+                    }
+                }
 
-             g.vertices.push(tmp);
-         }
+                this.vertices.push(tmp);
+            }
+        }        
      }
-     return g;
- }
+
+     load(data) {
+         this.vertices = data.vertices;
+     }
+
+     save() {
+
+     }
+};
 
  function viz() {
      var gardenGrid = d3.select("#gardenGrid");
@@ -296,10 +293,12 @@
  }
 
  var vegetables = {{{ tojson vegetables }}};
- var {garden, selections} = {{{ state }}} || { garden: initGarden(4, 4), selections: []};
+ var {garden, selections} = {{{ state }}} || { garden: new Garden(4, 4), selections: []};
 
  if({{{state}}} != false) {
-     garden = loadGarden(garden);
+     let v = garden;
+     garden = new Garden(v.xdim, v.ydim);
+     garden.load(v);
  }
 
  var additionMode = false;
