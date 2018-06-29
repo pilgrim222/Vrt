@@ -462,7 +462,7 @@ class Garden {
      $("#updateDims").on('click', function (e) {
          var xdim = parseInt($("#xinput").val());
          var ydim = parseInt($("#yinput").val());
-         var garden2 = initGarden(xdim, ydim);
+         var garden2 = new Garden(xdim, ydim);
          garden = garden2;
          $("#gardenGrid").empty();
          viz();
@@ -480,6 +480,10 @@ class Garden {
 
      $("#gardenUpload").on('change', function(e) {
 	    $("#gardenUploadForm").submit();
+     });
+
+     $(".vfilterlbl").on('click', (x) => {
+        x.stopPropagation();
      });
 
      // load state
@@ -503,39 +507,35 @@ class Garden {
 </nav>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="collapse navbar-collapse" id="navbarText">
-	<ul class="navbar-nav mr-auto">
-	    <li class="nav-item">
-		<label class="nav-link" id="btn_readGarden" for="gardenUpload">Preberi</label>
-	    </li>
-	    <li class="nav-item">
-		<label class="nav-link" id="btn_saveGarden">Shrani</label>
-	    </li>
-	</ul>
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+                <label class="nav-link" id="rastlinedd" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">&#x1F33F;Rastline</label>
+                <div class="dropdown-menu" id="subset_selector" aria-labelledby="rastlinedd">
+                    {{#each vegetables}}
+                        <label for="vf{{@key}}" class="dropdown-item vfilterlbl"><input type="checkbox" class="vfiltercb" value="{{@key}}" id="vf{{@key}}" /> {{name}}</label>
+                    {{/each}}
+                    <div class="dropdown-divider"></div>                    
+                </div>                
+            </li>
+            <li class="nav-item">
+                <label class="nav-link" id="btn_readGarden" for="gardenUpload">Preberi</label>
+            </li>
+            <li class="nav-item">
+                <label class="nav-link" id="btn_saveGarden">Shrani</label>
+            </li>
+        </ul>
+        <div class="form-inline">
+            <span class="nav-link">Velikost: </span>
+                <input type="text" id="xinput" value="4" /> x
+                <input type="text" id="yinput" value="4" /> polj.
+                <input class="btn" type="button" value="OK" id="updateDims" /> 
+        </div>            
     </div>
 </nav>
 <div id="main" class="container h-100">
     <div class="row h-100">
-        <span>&#x1F33F;Rastline</span>
-        <div class="col-md-3" id="subset_selector">
-            <div>
-                <ul class="vegfilter">
-                    {{#each vegetables}}
-                    <li>
-                        <input type="checkbox" class="vfiltercb" value="{{@key}}" id="vf{{@key}}" />
-                        <label for="vf{{@key}}">{{name}}</label>
-                    </li>
-                    {{/each}}
-                </ul>
-            </div>
-        </div>
 
         <div class="col-md-6 h-100">
-            <div>
-                <span>Velikost:
-                    <input type="text" id="xinput" value="4" /> x
-                    <input type="text" id="yinput" value="4" /> polj.
-                    <input type="button" value="OK" id="updateDims" />
-            </div>
             <div>&nbsp;</div>
             <svg id="gardenGrid" width="100%" height="100%" />
         </div>
