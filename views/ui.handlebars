@@ -459,7 +459,33 @@ class Garden {
          var xdim = parseInt($("#xinput").val());
          var ydim = parseInt($("#yinput").val());
          var garden2 = new Garden(xdim, ydim);
+         
+         garden2.vertices.map(function(newVertex, newVertexID) {
+            let {gridx, gridy} = newVertex;
+            if(gridx < garden.xdim && gridy < garden.ydim) {
+                let oldVertex = garden.getVertex(gridx, gridy);
+                newVertex.vegetableIds = oldVertex.vegetableIds;
+                newVertex.affinity = oldVertex.affinity;
+                oldVertex.edges.keys().forEach((direction) => 
+                    {
+                        let e = oldVertex.edges[direction];
+                        let ev = garden.vertices[e.endVertexId];
+                        newVertex.edges[direction] = {
+                            startVertexId: newVertexID,
+                            endVertexId: garden2.toIndex(garden.getVertex(ev.gridx), garden.getVertex(ev.gridy)),
+                            startx: e.startx,
+                            endx: e.endx,
+                            starty: e.starty,
+                            endy: e.endy,
+                            affinity: e.affinity
+                        };
+                    }
+                );
+            }
+         });
+
          garden = garden2;
+
          $("#gardenGrid").empty();
          viz();
      });
@@ -522,8 +548,8 @@ class Garden {
         </ul>
         <div class="form-inline">
             <span class="nav-link">Velikost: </span>
-                <input type="text" id="xinput" value="4" /> x
-                <input type="text" id="yinput" value="4" /> polj.
+                <input type="text" id="xinput" value="4" size="3" /> x
+                <input type="text" id="yinput" value="4" size="3" />
                 <input class="btn" type="button" value="OK" id="updateDims" /> 
         </div>            
     </div>

@@ -107,25 +107,11 @@ body {
 	text-align: center;
 }
 
-.vegfilter {
-    height: auto;
-    width: 100%;
-}
-
-.vegfilter input {
-    margin-right: 0.5em;
-}
-
-.vegfilter li {
-    list-style: none;
-}
-
-.vegfilter label {
+#subset_selector label {
     margin-bottom: 0.1em;
     padding-bottom: 0px;
     padding-top: 0px;	
 }
-
 
 .blur{
     position: absolute;
