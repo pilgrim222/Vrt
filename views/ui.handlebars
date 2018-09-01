@@ -3,6 +3,7 @@
 
 <script type="text/javascript">
 
+
  const ELEM_SIZE = 30;
  const ELEM_DIST = 3 * ELEM_SIZE;
  const LINE_LEN = ELEM_DIST - 2 * ELEM_SIZE;
@@ -124,15 +125,15 @@
      return textElement.node().getBBox().height <= 2 * ELEM_SIZE - 10;
  }
 
-class Garden {
+ class Garden {
 
-    constructor(xdim, ydim) {
-        this.vertices = [];
-        this.xdim = xdim;
-        this.ydim = ydim;
+     constructor(xdim, ydim) {
+         this.vertices = [];
+         this.xdim = xdim;
+         this.ydim = ydim;
 
-        this.initGrid();
-    }
+         this.initGrid();
+     }
 
      toIndex(ci, cj) {
          return ci * this.ydim + cj;
@@ -169,46 +170,46 @@ class Garden {
      }
 
      initGrid() {
-        for (let i = 0; i < this.xdim; i++) {
-            for (let j = 0; j < this.ydim; j++) {
-                let cindex = this.toIndex(i, j);
-                let tmp = {
-                    xpos: ELEM_SIZE + i * ELEM_DIST,
-                    ypos: ELEM_SIZE + j * ELEM_DIST,
-                    gridx: i,
-                    gridy: j,
-                    vegetableIds: [],
-                    edges: {},
-                    affinity: 0
-                };
+         for (let i = 0; i < this.xdim; i++) {
+             for (let j = 0; j < this.ydim; j++) {
+                 let cindex = this.toIndex(i, j);
+                 let tmp = {
+                     xpos: ELEM_SIZE + i * ELEM_DIST,
+                     ypos: ELEM_SIZE + j * ELEM_DIST,
+                     gridx: i,
+                     gridy: j,
+                     vegetableIds: [],
+                     edges: {},
+                     affinity: 0
+                 };
 
-                if (i > 0) {
-                    tmp.edges['left'] = {
-                        startVertexId: cindex,
-                        endVertexId: this.toIndex(i - 1, j),
-                        startx: tmp.xpos - ELEM_SIZE,
-                        endx: tmp.xpos - ELEM_SIZE - LINE_LEN,
-                        starty: tmp.ypos,
-                        endy: tmp.ypos,
-                        affinity: 0
-                    };
-                }
+                 if (i > 0) {
+                     tmp.edges['left'] = {
+                         startVertexId: cindex,
+                         endVertexId: this.toIndex(i - 1, j),
+                         startx: tmp.xpos - ELEM_SIZE,
+                         endx: tmp.xpos - ELEM_SIZE - LINE_LEN,
+                         starty: tmp.ypos,
+                         endy: tmp.ypos,
+                         affinity: 0
+                     };
+                 }
 
-                if (j > 0) {
-                    tmp.edges['up'] = {
-                        startVertexId: cindex,
-                        endVertexId: this.toIndex(i, j - 1),
-                        startx: tmp.xpos,
-                        endx: tmp.xpos,
-                        starty: tmp.ypos - ELEM_SIZE,
-                        endy: tmp.ypos - ELEM_SIZE - LINE_LEN,
-                        affinity: 0
-                    }
-                }
+                 if (j > 0) {
+                     tmp.edges['up'] = {
+                         startVertexId: cindex,
+                         endVertexId: this.toIndex(i, j - 1),
+                         startx: tmp.xpos,
+                         endx: tmp.xpos,
+                         starty: tmp.ypos - ELEM_SIZE,
+                         endy: tmp.ypos - ELEM_SIZE - LINE_LEN,
+                         affinity: 0
+                     }
+                 }
 
-                this.vertices.push(tmp);
-            }
-        }        
+                 this.vertices.push(tmp);
+             }
+         }        
      }
 
      static fromSave(data) {
@@ -216,7 +217,7 @@ class Garden {
          garden.vertices = data.vertices; // Trenutno izgleda to kot odvečno delo, a cilj je, da se ne shranjuje celoten grid!
          return garden;
      }
-};
+ };
 
  function viz() {
      var gardenGrid = d3.select("#gardenGrid");
@@ -461,27 +462,27 @@ class Garden {
          var garden2 = new Garden(xdim, ydim);
          
          garden2.vertices.map(function(newVertex, newVertexID) {
-            let {gridx, gridy} = newVertex;
-            if(gridx < garden.xdim && gridy < garden.ydim) {
-                let oldVertex = garden.getVertex(gridx, gridy);
-                newVertex.vegetableIds = oldVertex.vegetableIds;
-                newVertex.affinity = oldVertex.affinity;
-                oldVertex.edges.keys().forEach((direction) => 
-                    {
-                        let e = oldVertex.edges[direction];
-                        let ev = garden.vertices[e.endVertexId];
-                        newVertex.edges[direction] = {
-                            startVertexId: newVertexID,
-                            endVertexId: garden2.toIndex(garden.getVertex(ev.gridx), garden.getVertex(ev.gridy)),
-                            startx: e.startx,
-                            endx: e.endx,
-                            starty: e.starty,
-                            endy: e.endy,
-                            affinity: e.affinity
-                        };
-                    }
-                );
-            }
+             let {gridx, gridy} = newVertex;
+             if(gridx < garden.xdim && gridy < garden.ydim) {
+                 let oldVertex = garden.getVertex(gridx, gridy);
+                 newVertex.vegetableIds = oldVertex.vegetableIds;
+                 newVertex.affinity = oldVertex.affinity;
+                 Object.keys(oldVertex.edges).forEach((direction) => 
+                     {
+                         let e = oldVertex.edges[direction];
+                         let ev = garden.vertices[e.endVertexId];
+                         newVertex.edges[direction] = {
+                             startVertexId: newVertexID,
+                             endVertexId: garden2.toIndex(ev.gridx, ev.gridy),
+                             startx: e.startx,
+                             endx: e.endx,
+                             starty: e.starty,
+                             endy: e.endy,
+                             affinity: e.affinity
+                         };
+                     }
+                 );
+             }
          });
 
          garden = garden2;
@@ -501,11 +502,11 @@ class Garden {
      });
 
      $("#gardenUpload").on('change', function(e) {
-	    $("#gardenUploadForm").submit();
+	 $("#gardenUploadForm").submit();
      });
 
      $(".vfilterlbl").on('click', (x) => {
-        x.stopPropagation();
+         x.stopPropagation();
      });
 
      // load state
@@ -514,7 +515,7 @@ class Garden {
          $(`#${x}`).prop("checked", true);
          $(`#${x}`).change();
      });     
- 
+     
      $("#xinput").val(garden.xdim);
      $("#yinput").val(garden.ydim);     
  });
